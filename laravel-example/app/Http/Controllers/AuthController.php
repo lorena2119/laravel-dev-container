@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
+    
     function login(Request $request){
-        return response()->json(['message' => 'Login succesful'], 200);
+        return $this->ok("hello camper!", ['example' => 'example data']);
     }
 }
