@@ -15,12 +15,12 @@ class PostSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('table_posts')->insert([
-            'title' => Str::random(10),
-            'content' => Str::random(10). '@example.com',
-            'status' => true,
-        ]);
+        // DB::table('posts')->insert([
+        //     'title' => Str::random(10),
+        //     'content' => Str::random(10). '@example.com',
+        //     'status' => true,
+        // ]);
 
         Post::factory()->count(50)->create();
-    }
+    }  
 }

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\StorePostRequest;
 
 class PostController extends Controller
 {
@@ -21,11 +22,10 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        $newPost = Post::updateOrCreate(
-            ['title' => $request->title],
-            $request->only(['title', 'content', 'status']));
+        $data = $request->validated();
+        $newPost = Post::create($data);
         return $this->ok("Todo melo", [$newPost]);
     }
 
