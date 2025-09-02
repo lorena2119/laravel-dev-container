@@ -10,7 +10,12 @@ trait ApiResponse{
             'status' => $status
         ], $status);
     }
+
     protected function ok($message, $data = null){
         return $this->success($message, $data, 200);
+    }
+    
+    protected function create($message, $data = null){
+        return $this->success($message, $data, 201);
     }
 }
