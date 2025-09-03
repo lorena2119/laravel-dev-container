@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Suports\Str;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Rules\HtmlSafe;
 
 class UpdatePostRequest extends FormRequest
 {
@@ -38,11 +39,11 @@ class UpdatePostRequest extends FormRequest
                 ->ignore($postId)
                 ->whereNull('deleted_at') // Soft Deletes    
         ],
-            'content' => ['sometimes', 'string', 'min:20'],
+            'content' => ['sometimes', 'string', 'min:20', new HtmlSafe],
 
             'status' => ['sometimes', Rule::in(['draft', 'published', 'archived', 'default'])],
             'published_at' => ['nullable', 'date', 'required_if:status,published', 'before_or_equal:now'],
-            'cover_image' => ['nullable', 'file', 'mimetypes:images/jpeg,image/png,image/webp', 'max:2048'],
+            'cover_image' => ['nullable', 'file', 'mimetypes:images/jpeg,image/png,image/webp,image/avif', 'max:2048'],
             
             'tags' => ['nullable', 'array', 'max:20'],
             'tags.*' => ['string', 'min:2', 'max:30', 'distinct'],

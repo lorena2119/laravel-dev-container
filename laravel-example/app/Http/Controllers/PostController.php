@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
+use App\Http\Resources\PostResource;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\JsonResponse;
 
 class PostController extends Controller
 {
@@ -16,15 +18,16 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-       return $this->ok("Todo ok, como dijo el Pibe", Post::get());
+       $posts = Post::with('categories')->get();
+       return $this->success(PostResource::collection($posts));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StorePostRequest $request)
+    public function store(StorePostRequest $request): JsonResponse
     {
         $data = $request->validated();
 
@@ -38,26 +41,26 @@ class PostController extends Controller
             $newPost->categories()->sync($data['category_ids']);
         }
 
-        return $this->create("Todo melo", [$newPost]);
+        return $this->success(new PostResource($newPost), 'Post creado correctamente', 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         $result = Post::find($id);
         if ($result){
-            return $this->ok("Todo ok, como dijo el Pibe", $result);
+            return $this->success(new PostResource($result), "Todo ok, como dijo el Pibe");
         }else{
-            return $this->success("Todo mal, como no dijo el Pibe", [], 404);
+            return $this->error("Todo mal, como no dijo el Pibe", 404, ['id' => 'No se encontró el id']);
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePostRequest $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post): JsonResponse
     {
         $data = $request->validated();
 
@@ -71,15 +74,21 @@ class PostController extends Controller
         if (array_key_exists('category_ids', $data)) {
             $post->categories()->sync($data['category_ids'] ?? []);
         }
-        return $this->ok("Todo melo", [$post]);
+        return $this->success(new PostResource($post));
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Post $post)
+    public function destroy(Post $post): JsonResponse
     {
         $post->delete(); // Soft Delete
-        return $this->ok("Todo ok con la eliminación", [$post]);
+        return $this->success(null, 'Post eliminado', 204);
+    }
+
+    public function restore(int $id): JsonResponse{
+        $post = Post::onlyTrashed()->findOrFail($id);
+        $post->restore();
+        return $this->success($post, 'Post restaurado correctamente');
     }
 }
