@@ -80,6 +80,7 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    
     public function destroy(Post $post): JsonResponse
     {
         $post->delete(); // Soft Delete

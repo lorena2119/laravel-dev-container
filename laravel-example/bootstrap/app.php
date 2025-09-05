@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use App\Http\Middleware\ForceJsonResponse;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,7 +22,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'role' => RoleMiddleware::class,
+        ]);
+        
+        $middleware->appendToGroup('api', [
+            ForceJsonResponse::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->shouldRenderJsonWhen(
@@ -80,5 +88,25 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => $status === 500 ? 'Error interno en el servidor.' : $e->getMessage(),
                 'errors'  => ['exception', $e],
             ], 405);
+        });
+
+        // Too Many Requests (429)
+        $exceptions->render(function (TooManyRequestsHttpException $e, $request) {
+            $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Limite de peticiones',
+                'errors'  => [],
+            ], 429);
+        });
+
+        // Generico
+        $exceptions->render(function (\Throwable $e, $request){
+            $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+            return response()->json([
+                'status' => 'error',
+                'message' => $status === 500 ? 'Error interno del servidor' : $e->getMessage(),
+                'errors' => ['exception', $e],
+            ]);
         });
     })->create();
