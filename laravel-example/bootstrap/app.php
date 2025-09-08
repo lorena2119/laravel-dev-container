@@ -9,6 +9,8 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Laravel\Passport\Http\Middleware\CheckToken;
+use Laravel\Passport\Http\Middleware\CheckTokenForAnyScope;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use App\Http\Middleware\ForceJsonResponse;
@@ -24,8 +26,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => RoleMiddleware::class,
+            'scopes' => CheckToken::class, // todos
+            'scope' =>CheckTokenForAnyScope::class, // alguno
         ]);
-        
+
         $middleware->appendToGroup('api', [
             ForceJsonResponse::class,
         ]);
@@ -101,12 +105,12 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // Generico
-        $exceptions->render(function (\Throwable $e, $request){
-            $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
-            return response()->json([
-                'status' => 'error',
-                'message' => $status === 500 ? 'Error interno del servidor' : $e->getMessage(),
-                'errors' => ['exception', $e],
-            ]);
-        });
+        // $exceptions->render(function (\Throwable $e, $request){
+        //     $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => $status === 500 ? 'Error interno del servidor' : $e->getMessage(),
+        //         'errors' => ['exception', $e],
+        //     ]);
+        // });
     })->create();
