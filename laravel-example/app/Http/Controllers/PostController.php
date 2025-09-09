@@ -20,7 +20,7 @@ class PostController extends Controller
      */
     public function index(): JsonResponse
     {
-       $posts = Post::with('categories')->get();
+       $posts = Post::with('user', 'categories')->get();
        return $this->success(PostResource::collection($posts));
     }
 
@@ -30,6 +30,9 @@ class PostController extends Controller
     public function store(StorePostRequest $request): JsonResponse
     {
         $data = $request->validated();
+
+        // Body no v a a recibir id del usuario
+        $data['user_id'] = $request->user()->id; // Siempre se toma del token
 
         if ($request->hasFile('cover_image')) {
             $data['cover_image'] =$request->file('cover_image')->store('posts', 'public');
@@ -41,16 +44,18 @@ class PostController extends Controller
             $newPost->categories()->sync($data['category_ids']);
         }
 
+        $newPost->load(['user', 'categories']);
         return $this->success(new PostResource($newPost), 'Post creado correctamente', 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id): JsonResponse
+    public function show(string $id): JsonResponse //Post $post
     {
         $result = Post::find($id);
         if ($result){
+            $result->load(['user', 'categories']);
             return $this->success(new PostResource($result), "Todo ok, como dijo el Pibe");
         }else{
             return $this->error("Todo mal, como no dijo el Pibe", 404, ['id' => 'No se encontró el id']);
@@ -71,9 +76,12 @@ class PostController extends Controller
             $data['cover_image'] =$request->file('cover_image')->store('posts', 'public');
         }
         $post->update($data);
+
         if (array_key_exists('category_ids', $data)) {
             $post->categories()->sync($data['category_ids'] ?? []);
         }
+
+        $post->load(['user', 'categories']);
         return $this->success(new PostResource($post));
     }
 
@@ -89,7 +97,12 @@ class PostController extends Controller
 
     public function restore(int $id): JsonResponse{
         $post = Post::onlyTrashed()->findOrFail($id);
+        if (!$post) {
+            $this->success(new PostResource($newPost), 'Post no encontrado', 201);
+        }
+
         $post->restore();
+        $post->load(['user', 'categories']);
         return $this->success($post, 'Post restaurado correctamente');
     }
 }
