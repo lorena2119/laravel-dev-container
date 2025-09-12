@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: .devcontainer/Dockerfile
-    container_name: laravel11-app
     volumes:
       - .:/workspaces/${localWorkspaceFolderBasename}:delegated
     working_dir: /workspaces/${localWorkspaceFolderBasename}
@@ -23,7 +22,6 @@ services:
 
   db:
     image: mysql:8.4.3
-    container_name: laravel11-db
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: admin
@@ -47,14 +45,12 @@ services:
 
   redis:
     image: redis:7
-    container_name: laravel11-redis
     command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "6379:6379"
 
   mailpit:
     image: axllent/mailpit:latest
-    container_name: laravel11-mailpit
     ports:
       - "8025:8025" # UI
       - "1025:1025" # SMTP

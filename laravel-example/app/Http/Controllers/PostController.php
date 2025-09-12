@@ -11,6 +11,8 @@ use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
+use App\Mail\PostCreatedMail;
+use Illuminate\Support\Facades\Mail;
 
 class PostController extends Controller
 {
@@ -45,6 +47,8 @@ class PostController extends Controller
         }
 
         $newPost->load(['user', 'categories']);
+
+        Mail::to($newPost->user->email)->queue(new PostCreatedMail($newPost));
         return $this->success(new PostResource($newPost), 'Post creado correctamente', 201);
     }
 
