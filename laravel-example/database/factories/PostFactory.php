@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
@@ -28,8 +29,8 @@ class PostFactory extends Factory
             'meta' =>[
                 'seo_title' => fake()->sentence(3),
                 'seo_desc' => fake()->sentence(6),
-            ]
-            'user_id' => User::factory()
+            ],
+            'user_id' => User::factory(),
         ];
     }
 

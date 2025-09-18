@@ -1,3 +1,4 @@
+name: taller-clase-laravel-11
 services:
   app:
     build:

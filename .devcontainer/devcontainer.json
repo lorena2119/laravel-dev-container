@@ -1,5 +1,5 @@
 {
-  "name": "Laravel 11 Dev 2",
+  "name": "Laravel 11 Dev  - Lorena",
   "dockerComposeFile": ["../docker-compose.yml"],
   "service": "app",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",

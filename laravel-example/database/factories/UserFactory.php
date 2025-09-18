@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\Role;
+use App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -43,7 +44,14 @@ class UserFactory extends Factory
         ]);
     }
 
-    public function withRole(array $roleName = ['viewer']){
+    public function withRole(string $roleName = 'viewer'){
+        return $this->afterCreating(function(User $user) use ($roleName){
+            $role = Role::firstOrCreate(['name' => $roleName]);
+            $user->roles()->attach($role->id); 
+        });
+    }
+
+    public function withRoles(array $roleName = ['viewer']){
         return $this->afterCreating(function(User $user) use ($roleName){
             foreach ($roleName as $name) {
                 $role = Role::firstOrCreate(['name' => $name]);
